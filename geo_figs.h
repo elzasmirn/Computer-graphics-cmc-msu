@@ -6,6 +6,10 @@
 
 using namespace std;
 
+double max(const double, const double);
+double min(const double, const double);
+double mix(const double&, const double&, const double&);
+
 class vec3
 {
 public:
@@ -180,6 +184,40 @@ struct Sphere : Figure
 		center = cen;
 		radius = r;
 		radius2 = r * r;
+		color = col,
+			reflect = ref;
+		transparent = trans;
+	}
+
+	bool intersect(const Ray& r, double& t0, double& t1) const;
+	void getNorm(const vec3& pHit, vec3& nHit) const;
+};
+
+struct Bump_Sphere : Figure
+{
+	vec3 center;
+	double radius, radius2;
+	int nphi, ntheta;
+	double dr_bump;
+
+	Bump_Sphere()
+	{
+		transparent = reflect = 0;
+		center = vec3();
+		radius = 100;
+		radius2 = 100 * 100;
+		ntheta = 8;
+		nphi = 4 * ntheta;
+		dr_bump = 0.05;
+	}
+	Bump_Sphere(const vec3 cen, const double r,
+		const int np, const int nt, const double dr,
+		const Color col, const double ref, const double trans)
+	{
+		center = cen;
+		radius = r;
+		radius2 = r * r;
+		nphi = np; ntheta = nt; dr_bump = dr;
 		color = col,
 			reflect = ref;
 		transparent = trans;
