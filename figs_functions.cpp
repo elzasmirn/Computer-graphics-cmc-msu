@@ -21,7 +21,7 @@ double mix(const double &a, const double &b, const double &mix)
         return b * mix + a * (1 - mix);
 }
 
-bool Box:: intersect (const Ray& r, double& t0, double& t1) const 
+bool Box::intersect (const Ray& r, double& t0, double& t1) const 
     {
         vec3 inv_dir = 1/r.dir;
         double lo = inv_dir.x_*(boxMin.x_ - r.orig.x_);
@@ -59,4 +59,50 @@ void Box::getNorm (const vec3& pHit, vec3& nHit) const
         else if ( fabs( pHit.z_ - boxMin.z_ ) < eps ) //front
             nHit.z_ = 1;
 		else { cerr << "Box::getNorm: not at surface?" <<pHit<< endl; } 
+    }
+
+bool Plane::intersect (const Ray& r, double& t0, double& t1) const 
+    { //Ax+By+Cz+D=0
+        double fr =  N.x_*r.orig.x_ + N.y_*r.orig.y_ + N.z_*r.orig.z_ + D;
+        double t = N.x_*r.dir.x_ + N.y_*r.dir.y_ + N.z_*r.dir.z_ ;
+		if (t==0) {
+			cerr << "Plane::intersect: ray parallel?" << endl;
+			return false;
+		}
+        t0 =  -fr / t;
+        if (t0 < 0) return false;
+        else return true;
+    }       
+void Plane::getNorm (const vec3& pHit, vec3& nHit) const
+    {
+        nHit = N;
+    }
+
+bool Cylindr::intersect (const Ray& r, double& t0, double& t1) const 
+    { //(x-a)^ + (z-b)^ = r^2
+        //top and bot intesection
+        double t;
+        if ( r.dir.y_>0. && top.intersect(r,t,t) ||  r.dir.y_<0. && bot.intersect(r,t,t) )
+        {
+            vec3 hit = r.orig + r.dir * t - center;
+            if ( hit.x_*hit.x_ + hit.z_*hit.z_   < radius*radius )
+            {
+                t0 = t;
+                return true;
+            }
+        }
+        
+        //lateral intersection
+		vec3 rc_proj=r.orig-center;
+		rc_proj.y_=0.;
+		vec3 rd_proj=r.dir;
+		rd_proj.y_=0.;
+		double a=rd_proj.length2();
+		double b=2.*(rc_proj*rd_proj);
+		double c=rc_proj.length2()-radius * radius;
+		if(b>=0. || c<0.) return false;
+        if ( !QuadEq(a, b, c, t0, t1) ) return false;
+		vec3 hit = r.orig + r.dir * t0;
+        if ( fabs (hit.y_ - center.y_) > height/2  ) return false;
+		return true;
     }
