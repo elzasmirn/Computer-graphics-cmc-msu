@@ -21,6 +21,21 @@ double mix(const double &a, const double &b, const double &mix)
         return b * mix + a * (1 - mix);
 }
 
+bool QuadEq(const double &a, const double &b, const double &c, double &x0, double &x1) 
+{ 
+    if (a == 0) cerr << "QuadEq :: not equation" << endl;
+    double discr = b * b - 4 * a * c; 
+    if (discr < 0) return false; 
+    else if (discr == 0) { 
+        x0 = x1 = - 0.5 * b / a; 
+    } 
+    else { 
+        x0 = 0.5 * (-b - sqrt(discr)) / a; 
+        x1 = 0.5 * (-b + sqrt(discr)) / a; 
+    } 
+    return true; 
+} 
+
 bool Box::intersect (const Ray& r, double& t0, double& t1) const 
     {
         vec3 inv_dir = 1/r.dir;
@@ -105,4 +120,16 @@ bool Cylindr::intersect (const Ray& r, double& t0, double& t1) const
 		vec3 hit = r.orig + r.dir * t0;
         if ( fabs (hit.y_ - center.y_) > height/2  ) return false;
 		return true;
+    }
+void Cylindr::getNorm (const vec3& pHit, vec3& nHit) const
+    {
+        nHit = pHit - center;
+        if ( nHit.y_ >= height/2 )
+			nHit = vec3(0,1,0);
+		else if (nHit.y_ <= -height/2)
+			nHit = vec3(0,-1,0);
+        else{
+            nHit.y_  = 0;
+            nHit.normalize();
+        }
     }
