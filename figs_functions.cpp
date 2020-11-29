@@ -133,3 +133,58 @@ void Cylindr::getNorm (const vec3& pHit, vec3& nHit) const
             nHit.normalize();
         }
     }
+
+bool Cone::intersect (const Ray& r, double& t0, double& t1) const 
+    { //x^2 + z^2 - y^2 = 0;
+        double t;
+        if ( bot.intersect(r,t,t) )
+        {
+            vec3 hit = r.orig + r.dir * t - center;
+            if ( hit.x_*hit.x_ + hit.z_*hit.z_   < radius*radius )
+            {
+                t0 = t;
+                return true;
+            }
+        }
+        double rx = r.orig.x_ - center.x_;
+        double rz = r.orig.z_ - center.z_;
+        double ry = r.orig.y_ - center.y_;
+        double a = r.dir.x_*r.dir.x_ + r.dir.z_*r.dir.z_ - r.dir.y_*r.dir.y_;
+        double b = 2*( rx*r.dir.x_ + rz*r.dir.z_ - ry*r.dir.y_);
+        double c = rx*rx + rz*rz - ry*ry;
+        if ( !QuadEq(a, b, c, t0, t1) ) return false;
+        if (t0 < 0) t0 = t1;
+        if (t0 > 0)
+        {
+            vec3 hit;
+            if (t0 < t1) hit = r.orig + r.dir * t0;
+            else hit = r.orig + r.dir * t1;
+            if ( fabs (hit.y_ - center.y_) > height || hit.y_ < center.y_  ) return false;
+            return true;
+        }
+        return false;
+    }
+void Cone::getNorm (const vec3& pHit, vec3& nHit) const 
+    {
+        nHit = pHit - center;
+        if ( fabs (nHit.y_) >= height )
+            nHit = vec3(0,-1,0);
+        else{
+            nHit.y_  = -(nHit.x_*nHit.x_+nHit.z_*nHit.z_)/nHit.y_;
+            nHit.normalize();
+        }
+    }
+
+bool Sphere::intersect (const Ray& r, double& t0, double& t1) const 
+    {   
+        vec3 v = center - r.orig;
+        double tca = v*r.dir;
+        if (tca < 0) return false;
+        double d2 = v.length2() - tca*tca;
+        if(d2 > radius2) return false;
+        double thc = sqrt ( radius2-d2 );
+        t0 = tca - thc;
+        t1 = tca + thc;
+
+        return true;
+    }
