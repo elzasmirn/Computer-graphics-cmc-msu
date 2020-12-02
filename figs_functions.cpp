@@ -207,3 +207,38 @@ bool Bump_Sphere::intersect (const Ray& r, double& t0, double& t1) const
 	
         return true;
     }
+void Bump_Sphere::getNorm(const vec3& pHit, vec3& nHit) const
+    {
+        nHit = pHit - center;
+//        nHit.normalize();
+		double pi=4*atan(1.);
+		double phi, theta;
+		double rxy=sqrt(nHit.x_*nHit.x_+nHit.y_*nHit.y_);
+		phi=acos(nHit.x_/rxy);
+		if(nHit.y_<0.)
+			phi=-phi;
+		theta=asin(nHit.z_/radius);
+		double wei=fabs(theta)/(0.5*pi);
+		int nthe=ntheta;
+		int npht=nphi*(1.-wei)+0*wei;
+		double dr=dr_bump*radius;
+		//double rb=radius+dr*cos(npht*phi)*cos(nthe*theta);
+		//double drdphi=-dr*nphi*sin(npht*phi)*cos(nthe*theta);
+		//double drdthe=-dr*nthe*cos(npht*phi)*sin(nthe*theta);
+		double rb=radius+dr*fabs(cos(npht*phi)*cos(nthe*theta));
+		double drdphi=-dr*nphi*sin(npht*phi)*fabs(cos(nthe*theta));
+		if(cos(npht*phi)<0.) drdphi=-drdphi;
+		double drdthe=-dr*nthe*fabs(cos(npht*phi))*sin(nthe*theta);
+		if(cos(nthe*theta)<0.) drdthe=-drdthe;
+		vec3 tangphi=vec3( (drdphi*cos(phi)-rb*sin(phi))*cos(theta),
+						   (drdphi*sin(phi)+rb*cos(phi))*cos(theta),drdphi*sin(theta) );  
+		vec3 tangthe=vec3( (drdthe*cos(theta)-rb*sin(theta))*cos(phi),
+						   (drdthe*cos(theta)-rb*sin(theta))*sin(phi),
+						    drdthe*sin(theta)+rb*cos(theta) );
+		vec3 n_rb =(tangphi&tangthe).normalize();
+		nHit=nHit.normalize();
+		if(n_rb*nHit<0.)
+			nHit=-n_rb;
+		else
+ 			nHit= n_rb;
+   }
