@@ -204,6 +204,6 @@ bool Bump_Sphere::intersect (const Ray& r, double& t0, double& t1) const
         double thc = sqrt ( radius2-d2 );
         t0 = tca - thc;
         t1 = tca + thc;
-
+	
         return true;
     }
