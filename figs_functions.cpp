@@ -188,3 +188,22 @@ bool Sphere::intersect (const Ray& r, double& t0, double& t1) const
 
         return true;
     }
+void Sphere::getNorm(const vec3& pHit, vec3& nHit) const
+    {
+        nHit = pHit - center;
+        nHit.normalize();
+    }
+
+bool Bump_Sphere::intersect (const Ray& r, double& t0, double& t1) const 
+    {   
+        vec3 v = center - r.orig;
+        double tca = v*r.dir;
+        if (tca < 0) return false;
+        double d2 = v.length2() - tca*tca;
+        if(d2 > radius2) return false;
+        double thc = sqrt ( radius2-d2 );
+        t0 = tca - thc;
+        t1 = tca + thc;
+
+        return true;
+    }
