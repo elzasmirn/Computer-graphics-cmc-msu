@@ -44,6 +44,10 @@ public:
 	}
 };
 
+
+bool QuadEq(const double&, const double&, const double&, double&, double&); 
+
+
 struct Color
 {
 	double r, g, b;
@@ -225,4 +229,40 @@ struct Bump_Sphere : Figure
 
 	bool intersect(const Ray& r, double& t0, double& t1) const;
 	void getNorm(const vec3& pHit, vec3& nHit) const;
+};
+
+struct Rot_B_spline : Figure
+{
+    vec3 center;
+    double radius, height;
+    Plane top,bot;
+    tk::spline s_yr;
+	Rot_B_spline(vec3 c, vector <double> &y_pnt,vector <double> &r_pnt,
+            const Color col, const double ref, const double trans )
+    {   
+        center = c;
+		double y_min=y_pnt[0];
+		double y_max=y_pnt[y_pnt.size()-1];
+        height = y_max-y_min;
+		center.y_=0.5*(y_max+y_min);
+		s_yr.set_points(y_pnt,r_pnt);
+		int n_max=1000;
+		double hy=height/n_max;
+		radius=0.;
+		for(int i=0; i<=n_max; ++i)
+			radius=max(radius,s_yr(y_min+i*hy));
+		radius += 1.;
+//		cout<<"Rot_B_spline: max_radius="<<radius<<'\n';
+
+        color = col;
+        reflect = ref;
+        transparent = trans;
+//??        double eps = 1e-4;
+        double eps = 0.;
+        top = Plane(vec3(0,-1,0), center.y_-height/2-eps, col, ref, trans);
+		bot = Plane(vec3(0,-1,0), center.y_+height/2+eps, col, ref, trans);
+    }
+    
+    bool intersect (const Ray& r, double& t0, double& t1) const;
+    void getNorm (const vec3& pHit, vec3& nHit) const;
 };
