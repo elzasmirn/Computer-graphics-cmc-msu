@@ -242,3 +242,64 @@ void Bump_Sphere::getNorm(const vec3& pHit, vec3& nHit) const
 		else
  			nHit= n_rb;
    }
+bool Rot_B_spline::intersect (const Ray& r, double& t0, double& t1) const 
+    { 
+		// intersection with bigger cylinder
+		//(x-a)^ + (z-b)^ = r^2
+
+		vec3 hit;
+		bool t0_ok=false;
+		//lateral intersection
+		vec3 rc_proj=r.orig-center;
+		rc_proj.y_=0.;
+		vec3 rd_proj=r.dir;
+		rd_proj.y_=0.;
+		double a=rd_proj.length2();
+		double b=2.*(rc_proj*rd_proj);
+		double c=rc_proj.length2()-radius * radius;
+//			if(b>=0. || c<0.) return false;
+		if ( QuadEq(a, b, c, t0, t1) ) {
+			if(t0<0. && t1<0.) return false;
+//			if (t0 < 0.) t0 = 0.;
+			hit = r.orig + r.dir * t0;
+			if ( fabs (hit.y_ - center.y_) <= height/2  ) t0_ok=true;
+		}
+		double t=0.;
+		if(!t0_ok){
+			//top and bot intesection
+			if ( r.dir.y_>0. && top.intersect(r,t,t) ||  r.dir.y_<0. && bot.intersect(r,t,t) )
+			{
+				vec3 hit = r.orig + r.dir * t - center;
+				if ( hit.x_*hit.x_ + hit.z_*hit.z_   < radius*radius )
+				{
+					t0 = t;
+				}
+			}
+			if ( r.dir.y_<0. && top.intersect(r,t,t) ||  r.dir.y_>0. && bot.intersect(r,t,t) )
+			{
+	 //           vec3 hit = r.orig + r.dir * t - center;
+	 //           if ( hit.x_*hit.x_ + hit.z_*hit.z_   < radius*radius )
+				{
+					t1 = min(t1,t);
+				}
+			}
+		}
+		if(t1<0.) return false;
+		int nt=100;
+		double ht=(t1-t0)/nt;
+		t=t0;
+		for(int i=0; i<=nt; ++i){
+			hit = r.orig + r.dir * t;
+			vec3 dhc=hit-center;
+			dhc.y_=0.;
+			if(dhc.length() < s_yr(hit.y_) && t>0.){
+//				t0=t;
+				t0=t-ht;
+				return true;
+//				break;
+			}
+			t+=ht;
+		}
+//		if(t0>0.) return true;
+		return false;
+    }
