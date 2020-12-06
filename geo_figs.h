@@ -266,3 +266,24 @@ struct Rot_B_spline : Figure
     bool intersect (const Ray& r, double& t0, double& t1) const;
     void getNorm (const vec3& pHit, vec3& nHit) const;
 };
+
+struct CSG3 : Figure //Fig1 Union Fig2 Minus Fig3
+{
+    Sphere F1, F2;
+	Box F3;
+    
+	CSG3(Sphere Fig1,  Box Fig2, Sphere Fig3,
+            const Color col, const double ref, const double trans )
+    {   
+        F1 = Fig1;
+		F3 = Fig2;
+		F2 = Fig3;
+
+        color = col;
+        reflect = ref;
+        transparent = trans;
+    }
+    
+    bool intersect (const Ray& r, double& t0, double& t1) const;
+    void getNorm (const vec3& pHit, vec3& nHit) const;
+};
