@@ -303,3 +303,19 @@ bool Rot_B_spline::intersect (const Ray& r, double& t0, double& t1) const
 //		if(t0>0.) return true;
 		return false;
     }
+void Rot_B_spline::getNorm (const vec3& pHit, vec3& nHit) const
+    {
+        nHit = pHit - center;
+        if ( nHit.y_ >= height/2 && s_yr(nHit.y_)>0. )
+//??			nHit = vec3(0,1,0);
+			nHit = vec3(0,-1,0);
+		else if (nHit.y_ <= -height/2 && s_yr(nHit.y_)>0.)
+			nHit = vec3(0,-1,0);
+        else
+		{
+			double drdy=s_yr.deriv(1,pHit.y_);
+            nHit.y_  = 0;
+			nHit.y_=-nHit.length()*drdy;
+            nHit.normalize();
+        }
+    }
