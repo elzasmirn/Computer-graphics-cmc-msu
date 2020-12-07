@@ -242,6 +242,7 @@ void Bump_Sphere::getNorm(const vec3& pHit, vec3& nHit) const
 		else
  			nHit= n_rb;
    }
+
 bool Rot_B_spline::intersect (const Ray& r, double& t0, double& t1) const 
     { 
 		// intersection with bigger cylinder
@@ -318,4 +319,34 @@ void Rot_B_spline::getNorm (const vec3& pHit, vec3& nHit) const
 			nHit.y_=-nHit.length()*drdy;
             nHit.normalize();
         }
+    }
+
+bool CSG3::intersect (const Ray& r, double& t0, double& t1) const 
+    {   
+		double tf10, tf11, tf20, tf21, tf30, tf31;
+		if(!F1.intersect(r, tf10, tf11))
+			return false;
+		if(!F2.intersect(r, tf20, tf21))
+			return false;
+		t0 = max(tf10, tf20);
+		t1 = min(tf11, tf21);
+		if (t0>t1)
+			return false;
+		if(tf10<tf20)
+			hit_fig=2;
+		else
+			hit_fig=1;
+		if(F3.intersect(r, tf30, tf31))
+		{
+			if((tf30>t0) && (tf30<t1))
+				t1 = tf30;
+			else if((tf31<t1) && (tf31>t0))
+			{
+				t0 = tf31;
+				hit_fig = 3;
+			}
+			else if((tf30<t0) && (tf31>t1))
+				return false;
+		}	
+        return true;
     }
