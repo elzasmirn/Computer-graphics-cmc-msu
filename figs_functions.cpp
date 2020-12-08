@@ -350,3 +350,13 @@ bool CSG3::intersect (const Ray& r, double& t0, double& t1) const
 		}	
         return true;
     }
+void CSG3::getNorm(const vec3& pHit, vec3& nHit) const
+    {
+		if(hit_fig == 1)
+			F1.getNorm(pHit, nHit);
+		else if(hit_fig == 2)
+			F2.getNorm(pHit, nHit);
+		else if(hit_fig == 3)
+			F3.getNorm(pHit, nHit);
+        //nHit.normalize();
+    }
