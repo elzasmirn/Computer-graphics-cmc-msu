@@ -287,3 +287,12 @@ struct CSG3 : Figure //Fig1 Union Fig2 Minus Fig3
     bool intersect (const Ray& r, double& t0, double& t1) const;
     void getNorm (const vec3& pHit, vec3& nHit) const;
 };
+
+struct Light 
+{
+    vec3 PT;
+    vec3 dir;
+    double intens;
+    Light(const vec3& pos, const double i = 1): PT(pos), intens(i) {}
+    
+};
