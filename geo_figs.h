@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include "spline.h"
 
 using namespace std;
 
